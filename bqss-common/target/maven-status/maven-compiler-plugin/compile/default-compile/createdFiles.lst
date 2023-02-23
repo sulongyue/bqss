@@ -1,0 +1,8 @@
+com\bqss\constant\CommonConstant.class
+com\bqss\entity\ums\UserDTO.class
+com\bqss\entity\ums\User$UserBuilder.class
+com\bqss\entity\BaseDo.class
+com\bqss\api\Result.class
+com\bqss\entity\ums\UserVO.class
+com\bqss\Exception\BusinessException.class
+com\bqss\entity\ums\User.class

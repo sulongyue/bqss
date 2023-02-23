@@ -1,0 +1,89 @@
+<configuration>
+    <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+    <springProperty scope="context" name="APPLICATION_NAME" source="spring.application.name"  defaultValue="order"/>
+    <springProperty scope="context" name="LOG_PATH" source="logging.path" defaultValue="/data/log"/>
+    <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%message：日志消息，%n是换行符-->
+    <springProperty scope="context" name="LOG_LEVEL" source="logging.level" defaultValue="info"/>
+
+    <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>
+                %d [%X{traceId}/%X{spanId}] [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </layout>
+    </appender>
+
+<!--    &lt;!&ndash; 阿里日志配置 &ndash;&gt;-->
+<!--    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>-->
+<!--    <appender name="aliyun_sls" class="fly.cloud.common.base.log.LogHubAppender">-->
+<!--        &lt;!&ndash;必选项&ndash;&gt;-->
+<!--        &lt;!&ndash; 账号及网络配置 &ndash;&gt;-->
+<!--        <endpoint>cn-shanghai-intranet.log.aliyuncs.com</endpoint>-->
+<!--        <accessKeyId>LTAI4GDoQC9JsTYfPYNBbdJh</accessKeyId>-->
+<!--        <accessKeySecret>QjocPGJV4AK5JdZJE8Tdj3rAPLtlH2</accessKeySecret>-->
+<!--        &lt;!&ndash; sls 项目配置 &ndash;&gt;-->
+<!--        <project>fly-yewu-log</project>-->
+<!--        <logStore>fly-java-log</logStore>-->
+<!--        &lt;!&ndash;必选项 (end)&ndash;&gt;-->
+
+<!--        &lt;!&ndash; 主题：项目名称 &ndash;&gt;-->
+<!--        <topic>order</topic>-->
+<!--        &lt;!&ndash; 可选项 详见 '参数说明'&ndash;&gt;-->
+<!--        <totalSizeInBytes>104857600</totalSizeInBytes>-->
+<!--        <maxBlockMs>60000</maxBlockMs>-->
+<!--        <ioThreadCount>8</ioThreadCount>-->
+<!--        <batchSizeThresholdInBytes>524288</batchSizeThresholdInBytes>-->
+<!--        <batchCountThreshold>4096</batchCountThreshold>-->
+<!--        <lingerMs>2000</lingerMs>-->
+<!--        <retries>10</retries>-->
+<!--        <baseRetryBackoffMs>100</baseRetryBackoffMs>-->
+<!--        <maxRetryBackoffMs>100</maxRetryBackoffMs>-->
+<!--        &lt;!&ndash; 可选项 通过配置 encoder 的 pattern 自定义 log 的格式 &ndash;&gt;-->
+<!--        <encoder>-->
+<!--            <pattern>%d [%X{traceId}/%X{spanId}] %-5level [%thread] %logger{0}: %msg</pattern>-->
+<!--        </encoder>-->
+<!--        &lt;!&ndash; 可选项 设置时间格式 &ndash;&gt;-->
+<!--        <timeFormat>yyyy-MM-dd'T'HH:mmZ</timeFormat>-->
+<!--        &lt;!&ndash; 可选项 设置时区 &ndash;&gt;-->
+<!--        <timeZone>Asia/Shanghai</timeZone>-->
+<!--    </appender>-->
+
+    <appender name="fileLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <File>${LOG_PATH}/${APPLICATION_NAME}/${APPLICATION_NAME}.log</File>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>DEBUG</level>
+            </filter>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!--日志文件输出的文件名-->
+                <FileNamePattern>${LOG_PATH}/${APPLICATION_NAME}/${APPLICATION_NAME}-%d{yyyy-MM-dd}-%i.log</FileNamePattern>
+                <!--日志文件保留天数-->
+                <MaxHistory>3</MaxHistory>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <!-- rollover daily or whenever the file size reaches 500MB -->
+                    <maxFileSize>500MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%message：日志消息，%n是换行符-->
+                <pattern>
+                    %d [%X{traceId}/%X{spanId}] [%thread] %-5level %logger{36} - %msg%n
+                </pattern>
+            </encoder>
+        </appender>
+
+
+    <springProfile name="prod">
+        <root level="info">
+            <appender-ref ref="consoleLog" />
+            <appender-ref ref="aliyun_sls" />
+        </root>
+    </springProfile>
+
+    <springProfile name="!prod">
+        <root level="${LOG_LEVEL}">
+            <appender-ref ref="consoleLog" />
+            <appender-ref ref="fileLog" />
+        </root>
+    </springProfile>
+</configuration>
