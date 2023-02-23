@@ -1,0 +1,2 @@
+# bqss
+a study project
